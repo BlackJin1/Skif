@@ -1,5 +1,5 @@
 /**
- * https://habrahabr.ru/sandbox/88039/
+ *
  * Created by knyazev.v on 02.11.2017.
  */
 public class Main {
