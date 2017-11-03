@@ -42,7 +42,7 @@ public class Conn {
     // -------- Вывод таблицы--------
     public static void ReadDB() throws ClassNotFoundException, SQLException
     {
-        resSet = statmt.executeQuery("SELECT * FROM users");
+        resSet = statmt.executeQuery("SELECT * FROM Sits");
 
         while(resSet.next())
         {
