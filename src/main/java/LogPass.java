@@ -8,6 +8,7 @@ public class LogPass {
     private String url;
     private String login;
     private String password;
+    private String machineID;
 
     @Override
     public boolean equals(Object o) {
@@ -49,7 +50,16 @@ public class LogPass {
         this.password = password;
     }
 
-    public LogPass(String user, String url, String login, String password) {
+    public LogPass(String appName, String user, String url, String login, String password, String machineID) {
+        this.appName = appName;
+        this.user = user;
+        this.url = url;
+        this.login = login;
+        this.password = password;
+        this.machineID = machineID;
+    }
+
+    public LogPass(String user_comp, String user, String url, String login) {
         this.user = user;
         this.url = url;
         this.login = login;
@@ -85,5 +95,25 @@ public class LogPass {
 
     public void setAppName(String appName) {
         this.appName = appName;
+    }
+
+    public String getMachineID() {
+        return machineID;
+    }
+
+    public void setMachineID(String machineID) {
+        this.machineID = machineID;
+    }
+
+    @Override
+    public String toString() {
+        return "LogPass{" +
+                "appName='" + appName + '\'' +
+                ", user='" + user + '\'' +
+                ", url='" + url + '\'' +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", machineID='" + machineID + '\'' +
+                '}';
     }
 }

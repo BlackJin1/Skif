@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,16 +16,17 @@ class Manager {
     private String appName;
     private String login;
     private String pass;
+    private String user;
     private int count = 0;
 
 
-    Manager(String dirResult) {
-        arrayLogPasses = new HashMap<String, ArrayList<LogPass>>();
-        url ="";
-        appName="";
-        login="";
-        pass="";
-        this.dirResult = dirResult;
+    Manager() {
+        arrayLogPasses = new HashMap<>();
+        url     = "";
+        appName = "";
+        login   = "";
+        pass    = "";
+        user    = "";
     }
 
     public int getCount() {
@@ -35,44 +37,80 @@ class Manager {
      * обработать данные по указанному пути
      * @param filePath - Путь с ресурсами
      */
-    public String processData(String filePath){
+    public void processData(String filePath){
         File file = new File(filePath);
+        StringBuilder s = new StringBuilder();
         if (file.isFile()){
-            // Обработать файл
-            arrayLogPasses = new HashMap<String, ArrayList<LogPass>>();
-            arrayLogPasses = processFile(file);
-            System.out.println(file.getAbsoluteFile());
-            //arrayLogPasses = new HashMap<>();
-            file.delete();
-            count++;
+            if (file.getName().equals("SYSInfo.txt")){
+                String compUser = findUserCompName(file);
+                for (Map.Entry<String, ArrayList<LogPass>> entry: arrayLogPasses.entrySet()){
+//                    s.append("\r\n"+entry.getKey());
+//                    for (LogPass logPass:entry.getValue()) {
+//                        s.append("\r\nComp(User): " +logPass.getUrl());
+//                        s.append("\r\nLogin: "      +logPass.getLogin());
+//                        s.append("\r\nPassword: "   +logPass.getPassword());
+//                        s.append("\r\n=================================");
+//                    }
+                    //s.append("*****************************************");
+                    writResult(entry.getKey(),entry.getValue(),compUser);
+                }
+            }else if (file.getName().equals("Passwords.txt")){
+                // Обработать файл
+                arrayLogPasses = new HashMap<>();
+                arrayLogPasses = processFile(file);
+                System.out.println("Обработан: "+file.getAbsoluteFile());
+                count++;
+            }
+
         }else {
             // Обработать директори
             processDir(file);
         }
-
-        StringBuilder s = new StringBuilder();
-
-        for (Map.Entry<String, ArrayList<LogPass>> entry: arrayLogPasses.entrySet()){
-            s.append("\r\n"+entry.getKey());
-            for (LogPass logPass:entry.getValue()) {
-                s.append("\r\nLogin: "+logPass.getLogin());
-                s.append("\r\nPassword: "+logPass.getPassword());
-                s.append("\r\n=================================");
-
-            }
-            //s.append("*****************************************");
-            writResult(entry.getKey(),entry.getValue());
-        }
-
-        return s.toString();
     }
 
+    private String findUserCompName(File file) {
+        try (FileInputStream stream = new FileInputStream(file)){
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            String strLine;
+            while ((strLine = reader.readLine()) != null){
+                //находим индекс первого вхождения символа ":" в подстроке
+                int pos = strLine.indexOf(":");
+                if (pos> -1){
+                    //вычленяем имя атрибута из подстроки
+                    String attributeName= strLine.substring(0,pos);
+                    //вычленяем значение атрибута
+                    String value = strLine.substring(pos+1,strLine.length());
+                    //вывод на экран вычлененных значений в нужном нам формате.
+                    attributeName = attributeName.trim();
+                    if (attributeName.equals("Comp(User)")) {
+                        return value.trim();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
     /**
      * Запишим рещультат в файл
      */
-    private void writResult(String urlPath, ArrayList<LogPass> logPasses){
+    private void writResult(String urlPath, ArrayList<LogPass> logPasses, String compUser){
         String fileWrite;
+        String[] domains = {".com",
+                            ".net",
+                            ".ru",
+                            ".cc",
+                            ".org"};
         String newSrt   = urlPath;
+        for (String domain : domains) {
+            int index = newSrt.indexOf(domain);
+            if (index != -1) {
+                newSrt = newSrt.substring(0,index);
+                break;
+            }
+        }
+
         newSrt          = newSrt.replace("http://", "");
         newSrt          = newSrt.replace("pop3://", "");
         newSrt          = newSrt.replace("https://","");
@@ -93,6 +131,7 @@ class Manager {
             }
             for (LogPass pass:logPasses) {
                 String str = "\r\nURL:"    + pass.getUrl() +
+                        "\r\nComp(User): "  + compUser +
                         "\r\nLogin: "       + pass.getLogin() +
                         "\r\nPassword: "    + pass.getPassword() +
                         "\r\n";//****************************************\r\n";
@@ -130,27 +169,51 @@ class Manager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
         return arrayLogPasses;
     }
 
     private void processDir(File file){
-        String txt = ".txt";
-        String[] files = file.list(new MyFileNameFilter(txt));
-        for (String path: files) {
-            processData(file +"\\"+path);
+        String ext = "SYSInfo.txt,Passwords.txt";
+        String[] files  = file.list(new MyFileNameFilter(ext));
+        if (files.length > 0) {
+            for (String path: files) {
+                processData(file +"\\"+path);
+            }
+            deleteDirectory(file);
         }
+        else {
+            String[] dirs  = file.list(new MyDirFilter());
+            for (String path: dirs) {
+                processData(file +"\\"+path);
+            }
+        }
+
     }
 
+    /**
+     * Deletes directory with subdirs and subfolders
+     * @author Cloud
+     * @param dir Directory to delete
+     */
+    private void deleteDirectory(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i=0; i<children.length; i++) {
+                File f = new File(dir, children[i]);
+                deleteDirectory(f);
+            }
+            dir.delete();
+        } else dir.delete();
+    }
     private void determineKeyValue(String key, String value) {
-        if (key.equals("Application Name") && !value.isEmpty()){
+        value = value.replace("\t\t", "");
+        if (key.equals("SOFT") && !value.isEmpty()){
             this.setAppName(value);
-        }else if (key.equals("URL")||key.equals("Website")&& !value.isEmpty()){
+        }else if (key.equals("HOST")||key.equals("Website")&& !value.isEmpty()){
             this.setUrl(value);
-        }else if (key.equals("Username")&& !value.isEmpty()){
+        }else if (key.equals("USER")&& !value.isEmpty()){
             this.setLogin(value);
-        }else if (key.equals("Password")&& !value.isEmpty()){
+        }else if (key.equals("PASS")&& !value.isEmpty()){
             this.setPass(value);
         }
         createLogPas();
@@ -174,8 +237,6 @@ class Manager {
 
         }
     }
-
-
 
     public String getUrl() {
         return url;
@@ -207,5 +268,51 @@ class Manager {
 
     public void setPass(String pass) {
         this.pass = pass;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getDirResult() {
+        return dirResult;
+    }
+
+    public void setFilePath(String filePath) {
+
+        this.filePath = filePath;
+    }
+
+    public void setDirResult(String dirResult) {
+        this.dirResult = dirResult;
+    }
+
+    // Реализация интерфейса FileNameFilter
+    class MyFileNameFilter implements FilenameFilter {
+
+        String[] ext;
+
+        public MyFileNameFilter(String ext){
+            this.ext = ext.split(",");
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            for (String s : ext) {
+                if (name.equals(s)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    // Реализация интерфейса FileNameFilter
+    class MyDirFilter implements FilenameFilter {
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return dir.isDirectory();
+        }
     }
 }

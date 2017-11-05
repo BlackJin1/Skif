@@ -48,7 +48,7 @@ public class MyFrame extends JFrame {
         mainPanel.add(mainBox);
     }
 
-    private void writeLeftPanel(JTextArea textFieldRight) {
+    private void writeLeftPanel(final JTextArea textFieldRight) {
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
 
@@ -136,9 +136,11 @@ public class MyFrame extends JFrame {
                 if (dirResult.equals("")||filePath.equals("")){
                     JOptionPane.showMessageDialog(null,"Выбери файлы и директории блиать!");
                 }else {
-//                    Manager manager = new Manager(dirResult);
-//                    String result = manager.processData(filePath);
-//                    textFieldRight.setText("Обработано "+manager.getCount()+" файлов");
+                    Manager manager = new Manager();
+                    manager.setFilePath(filePath);
+                    manager.setDirResult(dirResult);
+                    manager.processData(filePath);
+                    textFieldRight.setText("Обработано "+manager.getCount()+" файлов");
                 }
 
             }
