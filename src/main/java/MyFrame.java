@@ -55,8 +55,8 @@ public class MyFrame extends JFrame {
         JButton jButton1 = new JButton("Выбрать");
         JButton jButton2 = new JButton("Выбрать");
         JButton jButton3 = new JButton("Запустить");
-        JTextField resourcesTextField   = new JFormattedTextField();
-        JTextField resultTextField      = new JFormattedTextField();
+        final JTextField resourcesTextField   = new JFormattedTextField();
+        final JTextField resultTextField      = new JFormattedTextField();
         JLabel labelResources           = new JLabel("Ресурсы: ");
         JLabel labelResult              = new JLabel("Результаты: ");
 
@@ -96,7 +96,7 @@ public class MyFrame extends JFrame {
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     //System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-//                    resourcesTextField.setText(""+chooser.getSelectedFile()); // отлавливаем "путь в нашу глобальную переменную
+                    resourcesTextField.setText(""+chooser.getSelectedFile()); // отлавливаем "путь в нашу глобальную переменную
                     // MyData.path = ""+chooser.getSelectedFile(); // при желании -отловим файл
                 } else {
                     System.out.println("No Selection ");
@@ -119,7 +119,7 @@ public class MyFrame extends JFrame {
 
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 //                    System.out.println("getCurrentDirectory(): " + chooser.getCurrentDirectory());
-//                    resultTextField.setText(""+chooser.getSelectedFile()); // отлавливаем "путь в нашу глобальную переменную
+                    resultTextField.setText(""+chooser.getSelectedFile()); // отлавливаем "путь в нашу глобальную переменную
 //                    // MyData.path = ""+chooser.getSelectedFile(); // при желании -отловим файл
                 } else {
                     System.out.println("No Selection ");
@@ -131,15 +131,15 @@ public class MyFrame extends JFrame {
         jButton3.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                String filePath     = resourcesTextField.getText();
-//                String dirResult    = resultTextField.getText();
-//                if (dirResult.equals("")||filePath.equals("")){
-//                    JOptionPane.showMessageDialog(null,"Выбери файлы и директории блиать!");
-//                }else {
+                String filePath     = resourcesTextField.getText();
+                String dirResult    = resultTextField.getText();
+                if (dirResult.equals("")||filePath.equals("")){
+                    JOptionPane.showMessageDialog(null,"Выбери файлы и директории блиать!");
+                }else {
 //                    Manager manager = new Manager(dirResult);
 //                    String result = manager.processData(filePath);
 //                    textFieldRight.setText("Обработано "+manager.getCount()+" файлов");
-//                }
+                }
 
             }
         });
