@@ -21,6 +21,7 @@ public class DataBaseManager {
             }
 
             dbHandler.dropTable("authors");
+            dbHandler.createTable("12");
             // Удаление записи с id=8
 //            dbHandler.deleteLogPas(700);
         }catch (SQLException e) {
