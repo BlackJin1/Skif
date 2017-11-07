@@ -1,4 +1,5 @@
 import java.io.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,7 +103,7 @@ class Manager {
                             ".ru",
                             ".cc",
                             ".org"};
-        String newSrt   = urlPath;
+        String newSrt = urlPath;
         for (String domain : domains) {
             int index = newSrt.indexOf(domain);
             if (index != -1) {
@@ -124,21 +125,28 @@ class Manager {
         File file = new File(fileWrite);
         boolean newFile = false;
         if (file.exists()) newFile = true;
+
         try (FileWriter writer = new FileWriter(file,newFile)){
+            DbHandler handler = DbHandler.getInstance();
+
             if (!newFile){
                 writer.append(urlPath+
                         "\r\n========================================\r\n");
             }
             for (LogPass pass:logPasses) {
+                pass.setUser(compUser);
                 String str = "\r\nURL:"    + pass.getUrl() +
                         "\r\nComp(User): "  + compUser +
                         "\r\nLogin: "       + pass.getLogin() +
                         "\r\nPassword: "    + pass.getPassword() +
                         "\r\n";//****************************************\r\n";
                 writer.append(str);
+                handler.addLogPass(pass);
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -221,7 +229,7 @@ class Manager {
 
     private void createLogPas(){
         if (!this.getUrl().equals("")&&!this.getPass().equals("")&&!this.getLogin().equals("")){
-            LogPass logPass = new LogPass(this.appName, this.url, this.login, this.pass);
+            LogPass logPass = new LogPass(this.appName,"" ,this.url, this.login, this.pass);
             this.setAppName("");
             this.setUrl("");
             this.setLogin("");
