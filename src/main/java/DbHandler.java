@@ -1,7 +1,12 @@
 
 import org.sqlite.JDBC;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 /**
  * Created by Вячеслав on 06.11.2017.
