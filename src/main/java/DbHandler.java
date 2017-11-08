@@ -1,4 +1,4 @@
-import DB.Product;
+
 import org.sqlite.JDBC;
 
 import java.sql.*;
