@@ -75,7 +75,7 @@ public class DbHandler {
     }
 
     // Создание таблицы
-    public void createTable(String tableName) {
+    public void createTable() {
         try (PreparedStatement statement = this.connection.prepareStatement(
                 "CREATE TABLE data (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                                         "user_comp TEXT, " +
@@ -83,7 +83,7 @@ public class DbHandler {
                                         "login TEXT, " +
                                         "password TEXT, " +
                                         "application TEXT, " +
-                                        "MachineID TEXT);" )){
+                                        "MachineID TEXT)")){
            // statement.setObject(1, tableName);
             // Выполним запрос
             statement.execute();
@@ -94,10 +94,10 @@ public class DbHandler {
     }
 
     // Удаление таблицы
-    public void dropTable(String tableName) {
+    public void dropTable() {
         try (PreparedStatement statement = this.connection.prepareStatement(
                     "DROP TABLE data")){
-//                statement.setObject(1, tableName);
+                //statement.setObject(1, tableName);
                 // Выполним запрос
                 statement.execute();
 

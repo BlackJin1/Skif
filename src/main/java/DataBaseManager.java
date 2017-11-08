@@ -1,5 +1,3 @@
-import DB.Product;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -20,8 +18,8 @@ public class DataBaseManager {
                 System.out.println(logPas.toString());
             }
 
-            dbHandler.dropTable("authors");
-            dbHandler.createTable("12");
+            dbHandler.dropTable();
+            dbHandler.createTable();
             // Удаление записи с id=8
 //            dbHandler.deleteLogPas(700);
         }catch (SQLException e) {
