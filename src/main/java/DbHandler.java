@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class DbHandler {
     // Константа с адресом подключения
-    private static final String CON_STR = "jdbc:sqlite:C:/log.s3db";//MyDataBase.s3db
+    private static final String CON_STR = "jdbc:sqlite:C:/log.s3db";
 
     // Используем шаблон одиночка, чтобы не плодить экземпляры данного класса
     private static DbHandler instance = null;
