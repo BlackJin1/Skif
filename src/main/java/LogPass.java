@@ -107,13 +107,8 @@ public class LogPass {
 
     @Override
     public String toString() {
-        return "LogPass{" +
-                "appName='" + appName + "\'\r\n" +
-                " user='" + user + "\r\n" +
-                " url='" + url + "\'\r\n" +
-                " login='" + login + "\'\r\n" +
-                " password='" + password + "\'\r\n" +
-                " machineID='" + machineID + "\'\r\n" +
-                '}';
+
+        return String.format("appName: %s | user: %s | url: %s | login: %s | password: %s | machineID: %s\r\n",
+                this.appName, this.user, this.url, this.login,this.password,this.machineID);
     }
 }

@@ -3,6 +3,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 
 /**
  * Created by knyazev.v on 26.10.2017.
@@ -51,10 +52,12 @@ public class MyFrame extends JFrame {
     private void writeLeftPanel(final JTextArea textFieldRight) {
         JPanel panel1 = new JPanel();
         JPanel panel2 = new JPanel();
+        JPanel panel3 = new JPanel();
 
         JButton jButton1 = new JButton("Выбрать");
         JButton jButton2 = new JButton("Выбрать");
         JButton jButton3 = new JButton("Запустить");
+        JButton jButton4 = new JButton("Очистить базу");
         final JTextField resourcesTextField   = new JFormattedTextField();
         final JTextField resultTextField      = new JFormattedTextField();
         JLabel labelResources           = new JLabel("Ресурсы: ");
@@ -82,7 +85,9 @@ public class MyFrame extends JFrame {
         leftPanel.add(panel2);
         //leftPanel.add(jButton2);
 
-        leftPanel.add(jButton3);
+        panel3.add(jButton4);
+        panel3.add(jButton3);
+        leftPanel.add(panel3);
 
         jButton1.addActionListener(new AbstractAction() {
 
@@ -143,6 +148,27 @@ public class MyFrame extends JFrame {
                     textFieldRight.setText("Обработано "+manager.getCount()+" файлов");
                 }
 
+            }
+        });
+
+        jButton4.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int result = JOptionPane.showConfirmDialog(MyFrame.this,
+                            "Очистить базу?",
+                            "Окно подтверждения",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+                    if (result==JOptionPane.YES_OPTION) {
+                        DbHandler handler = DbHandler.getInstance();
+                        handler.dropTable();
+                        handler.createTable();
+                    }
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
