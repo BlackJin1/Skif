@@ -9,6 +9,7 @@ public class Main {
 
 
 
+
 //        Manager manager = new Manager();
 //        manager.setDirResult("E:\\Плюшки\\Роман\\Результаты");
 //        manager.setFilePath("E:\\Плюшки\\Роман\\Ресурсы");
